@@ -34,60 +34,115 @@ export default function Home() {
   };
 
   return (
-    <div className="container">
-      <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <div>
-          <h1 style={{ margin: 0 }}>🎓 EdNerding</h1>
-          <p style={{ margin: "4px 0 0" }}>A Gimkit-style trivia game with in-game currency and upgrades.</p>
+    <div>
+      {/* Top nav */}
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <div className="navbar-brand">🎓 EdNerding</div>
+          <div className="navbar-actions">
+            {!loading && (
+              user ? (
+                <button className="btn-ghost" onClick={() => navigate("/account")}>
+                  {avatarEmoji(user.equippedAvatar)} {user.username} · ${user.balance}
+                </button>
+              ) : (
+                <button className="btn-ghost" onClick={() => navigate("/login")}>
+                  Log In
+                </button>
+              )
+            )}
+            <button className="btn-ghost" onClick={() => navigate("/question-sets")}>
+              My Question Sets
+            </button>
+          </div>
         </div>
-        {!loading && (
-          user ? (
-            <button onClick={() => navigate("/account")} style={{ whiteSpace: "nowrap" }}>
-              {avatarEmoji(user.equippedAvatar)} {user.username} (${user.balance})
-            </button>
-          ) : (
-            <button onClick={() => navigate("/login")} style={{ whiteSpace: "nowrap" }}>
-              Log In
-            </button>
-          )
-        )}
-      </div>
+      </nav>
 
-      <div className="card">
-        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
-          Question Set:
-        </label>
-        <select
-          value={selectedKey}
-          onChange={(e) => setSelectedKey(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "1px solid #d1d5db",
-            fontSize: 16,
-            marginBottom: 12
-          }}
-        >
-          {Object.entries(sets).map(([key, set]) => (
-            <option key={key} value={key}>
-              {set.name} ({set.questions.length} questions)
-            </option>
-          ))}
-        </select>
+      {/* Hero */}
+      <section className="hero">
+        <div className="hero-inner">
+          <div className="hero-text">
+            <h1 className="hero-title">
+              Learning, <span className="highlight">leveled up.</span>
+            </h1>
+            <p className="hero-subtitle">
+              Answer questions at your own pace, earn cash, and spend it on
+              upgrades that boost your score. The classroom game where strategy
+              meets knowledge.
+            </p>
 
-        <button onClick={handleHost}>Host a Game</button>
-      </div>
+            <div className="hero-actions">
+              <select
+                value={selectedKey}
+                onChange={(e) => setSelectedKey(e.target.value)}
+                className="hero-select"
+              >
+                {Object.entries(sets).map(([key, set]) => (
+                  <option key={key} value={key}>
+                    {set.name} ({set.questions.length} questions)
+                  </option>
+                ))}
+              </select>
+              <button className="btn-primary btn-large" onClick={handleHost}>
+                🚀 Host a Game
+              </button>
+            </div>
 
-      <div className="card">
-        <h2>Join a Game</h2>
-        <button onClick={() => navigate("/join")}>Enter Room Code</button>
-      </div>
+            <div className="hero-secondary">
+              <button className="btn-secondary" onClick={() => navigate("/join")}>
+                Enter Room Code
+              </button>
+            </div>
+          </div>
 
-      <div className="card">
-        <h2>Manage Question Sets</h2>
-        <button onClick={() => navigate("/question-sets")}>Create / Edit Questions</button>
-      </div>
+          <div className="hero-art" aria-hidden="true">
+            <div className="floating-card card-money">💰 +$15</div>
+            <div className="floating-card card-streak">🔥 Streak x3</div>
+            <div className="floating-card card-upgrade">⚡ Upgrade!</div>
+            <div className="hero-blob" />
+          </div>
+        </div>
+      </section>
+
+      {/* Feature highlights */}
+      <section className="features">
+        <div className="features-inner">
+          <FeatureCard
+            emoji="📝"
+            title="Make it yours"
+            description="Build custom question sets on any topic in minutes — perfect for any subject or grade level."
+          />
+          <FeatureCard
+            emoji="💸"
+            title="Earn while you learn"
+            description="Every correct answer pays out. Build up a balance and watch it grow as you play."
+          />
+          <FeatureCard
+            emoji="🛒"
+            title="Strategic upgrades"
+            description="Spend earnings on upgrades like Double or Nothing, Streak Bonuses, and Compound Interest."
+          />
+          <FeatureCard
+            emoji="🦄"
+            title="Unlock avatars"
+            description="Create a free account to save your earnings between games and unlock new avatars in the shop."
+          />
+        </div>
+      </section>
+
+      <footer className="footer">
+        <p>Made for classrooms everywhere. Have fun, learn something. 🎓</p>
+      </footer>
+    </div>
+  );
+}
+
+function FeatureCard({ emoji, title, description }) {
+  return (
+    <div className="feature-card">
+      <div className="feature-emoji">{emoji}</div>
+      <h3>{title}</h3>
+      <p>{description}</p>
     </div>
   );
 }

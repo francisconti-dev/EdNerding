@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3001/api";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
+const API_URL = `${SERVER_URL}/api`;
 
 function getToken() {
   return localStorage.getItem("authToken");

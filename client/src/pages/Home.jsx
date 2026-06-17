@@ -1,36 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { socket } from "../socket";
-import { api } from "../api";
 import { useAuth } from "../AuthContext";
 import { avatarEmoji } from "../avatars";
 
 export default function Home() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [sets, setSets] = useState({});
-  const [selectedKey, setSelectedKey] = useState("default");
 
-  useEffect(() => {
-    api
-      .getAllSets()
-      .then((data) => {
-        setSets(data);
-        if (!data[selectedKey]) {
-          const firstKey = Object.keys(data)[0];
-          if (firstKey) setSelectedKey(firstKey);
-        }
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleHost = () => {
-    socket.emit("host:create_game", { questionSetKey: selectedKey }, (res) => {
-      if (res.success) {
-        navigate("/host/lobby", { state: { code: res.code } });
-      }
-    });
+  const handleHostClick = () => {
+    navigate("/host");
   };
 
   return (
@@ -72,19 +50,8 @@ export default function Home() {
             </p>
 
             <div className="hero-actions">
-              <select
-                value={selectedKey}
-                onChange={(e) => setSelectedKey(e.target.value)}
-                className="hero-select"
-              >
-                {Object.entries(sets).map(([key, set]) => (
-                  <option key={key} value={key}>
-                    {set.name} ({set.questions.length} questions)
-                  </option>
-                ))}
-              </select>
-              <button className="btn-primary btn-large" onClick={handleHost}>
-                🚀 Host a Game
+              <button className="btn-primary btn-large" onClick={handleHostClick}>
+                {user ? "🚀 Host a Game" : "🔒 Log In to Host"}
               </button>
             </div>
 

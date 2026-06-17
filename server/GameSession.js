@@ -8,6 +8,7 @@ class GameSession {
   constructor(code, hostSocketId, questionSetKey = "default") {
     this.code = code;
     this.hostSocketId = hostSocketId;
+    this.mode = "classic";
     this.questionSet = getSet(questionSetKey) || getSet("default");
     this.status = "lobby"; // lobby | active | ended
     this.players = new Map(); // socketId -> player state

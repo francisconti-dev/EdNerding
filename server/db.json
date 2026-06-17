@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "fconti",
+      "passwordHash": "$2a$10$FQVvK7Zl3J3Fd3iva5f8NO6EjCNxhL.8PTYH49pyBn8OHXe606TtK",
+      "balance": 80,
+      "equippedAvatar": "default",
+      "ownedAvatars": [
+        "default",
+        "robot"
+      ]
+    }
+  ],
+  "nextUserId": 2
+}

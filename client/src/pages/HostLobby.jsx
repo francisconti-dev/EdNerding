@@ -6,6 +6,7 @@ export default function HostLobby() {
   const location = useLocation();
   const navigate = useNavigate();
   const code = location.state?.code;
+  const mode = location.state?.mode || "classic";
 
   const [players, setPlayers] = useState([]);
 
@@ -25,7 +26,7 @@ export default function HostLobby() {
 
   const handleStart = () => {
     socket.emit("host:start_game", { code });
-    navigate("/host/game", { state: { code } });
+    navigate("/host/game", { state: { code, mode } });
   };
 
   return (

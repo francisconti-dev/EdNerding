@@ -8,6 +8,7 @@ import HostLobby from "./pages/HostLobby";
 import HostGame from "./pages/HostGame";
 import PlayerJoin from "./pages/PlayerJoin";
 import PlayerGame from "./pages/PlayerGame";
+import PlayerFishingGame from "./pages/PlayerFishingGame";
 import QuestionSetList from "./pages/QuestionSetList";
 import QuestionSetEditor from "./pages/QuestionSetEditor";
 import Login from "./pages/Login";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/host/game" element={<HostGame />} />
           <Route path="/join" element={<PlayerJoin />} />
           <Route path="/play" element={<PlayerGame />} />
+          <Route path="/play-fishing" element={<PlayerFishingGame />} />
           <Route path="/question-sets" element={<QuestionSetList />} />
           <Route path="/edit/:key" element={<QuestionSetEditor />} />
           <Route path="/login" element={<Login />} />

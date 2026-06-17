@@ -5,6 +5,8 @@ const { Server } = require("socket.io");
 const { nanoid } = require("nanoid");
 
 const { GameSession, UPGRADES } = require("./GameSession");
+const { FishingSession } = require("./FishingSession");
+const { MAP_LAYOUT, FISH_CATALOG } = require("./fishingMapData");
 const questionSetStore = require("./questionSetStore");
 const db = require("./db");
 const { generateToken, verifyToken, requireAuth } = require("./auth");
@@ -141,6 +143,12 @@ app.post("/api/account/avatars/:avatarId/equip", requireAuth, (req, res) => {
   res.json(result.user);
 });
 
+// --- Fishing Mode static data ---
+
+app.get("/api/fishing/map", (req, res) => {
+  res.json({ layout: MAP_LAYOUT, fishCatalog: FISH_CATALOG });
+});
+
 // In-memory store of active games: code -> GameSession
 const games = new Map();
 
@@ -156,15 +164,19 @@ io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
   // HOST: create a new game session
-  socket.on("host:create_game", ({ questionSetKey } = {}, callback) => {
+  socket.on("host:create_game", ({ questionSetKey, mode } = {}, callback) => {
+    console.log("Creating game with mode:", mode);
     const code = generateRoomCode();
-    const game = new GameSession(code, socket.id, questionSetKey);
+    const game =
+      mode === "fishing"
+        ? new FishingSession(code, socket.id, questionSetKey)
+        : new GameSession(code, socket.id, questionSetKey);
     games.set(code, game);
     socket.join(code);
     socket.data.role = "host";
     socket.data.gameCode = code;
 
-    callback({ success: true, code });
+    callback({ success: true, code, mode: mode === "fishing" ? "fishing" : "classic" });
   });
 
   // HOST: start the game (players begin receiving questions)
@@ -225,10 +237,19 @@ io.on("connection", (socket) => {
     socket.data.role = "player";
     socket.data.gameCode = code;
 
-    callback({ success: true, code, upgrades: UPGRADES, loggedIn: !!user });
+    const isFishing = game.mode === "fishing";
+
+    callback({
+      success: true,
+      code,
+      upgrades: UPGRADES,
+      loggedIn: !!user,
+      mode: isFishing ? "fishing" : "classic",
+      player: isFishing ? game.players.get(socket.id) : undefined
+    });
 
     // Notify host of updated player list
-    io.to(game.hostSocketId).emit("host:player_list", { players: game.getPlayerList() });
+    broadcastLeaderboard(game);
 
     // If game already active, immediately send a question
     if (game.status === "active") {
@@ -272,6 +293,52 @@ io.on("connection", (socket) => {
     }
   });
 
+  // FISHING MODE: move a player one tile in a direction
+  socket.on("fishing:move", ({ direction }) => {
+    const code = socket.data.gameCode;
+    const game = games.get(code);
+    if (!game || game.mode !== "fishing" || game.status !== "active") return;
+
+    const result = game.movePlayer(socket.id, direction);
+    if (!result) return;
+
+    // Broadcast the updated position to everyone in the room (host + other players)
+    io.to(code).emit("fishing:player_moved", { id: socket.id, x: result.x, y: result.y });
+  });
+
+  // FISHING MODE: cast a line near water
+  socket.on("fishing:cast", (_, callback) => {
+    const code = socket.data.gameCode;
+    const game = games.get(code);
+    if (!game || game.mode !== "fishing" || game.status !== "active") {
+      return callback({ success: false, reason: "Game not active" });
+    }
+
+    const result = game.startCast(socket.id);
+    if (!result.success) return callback(result);
+
+    callback(result);
+
+    setTimeout(() => {
+      const catchResult = game.resolveCast(socket.id);
+      if (catchResult) {
+        io.to(socket.id).emit("fishing:catch_result", catchResult);
+        broadcastLeaderboard(game);
+      }
+    }, result.durationMs);
+  });
+
+  // FISHING MODE: sell all fish in inventory at the sell station
+  socket.on("fishing:sell", (_, callback) => {
+    const code = socket.data.gameCode;
+    const game = games.get(code);
+    if (!game || game.mode !== "fishing") return callback({ success: false, reason: "Game not active" });
+
+    const result = game.sellFish(socket.id);
+    callback(result);
+    if (result.success) broadcastLeaderboard(game);
+  });
+
   // Disconnect cleanup
   socket.on("disconnect", () => {
     const code = socket.data.gameCode;
@@ -296,6 +363,12 @@ io.on("connection", (socket) => {
 
 function broadcastLeaderboard(game) {
   io.to(game.hostSocketId).emit("host:player_list", { players: game.getPlayerList() });
+
+  // Fishing players need their own state (position, bait, inventory) too,
+  // since host:player_list is host-only. Broadcast to the whole room.
+  if (game.mode === "fishing") {
+    io.to(game.code).emit("fishing:state_sync", { players: game.getPlayerList() });
+  }
 }
 
 // Converts each logged-in player's in-game earnings to permanent account balance
@@ -310,5 +383,5 @@ function creditPlayerEarnings(game) {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  
 });

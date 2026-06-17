@@ -9,6 +9,7 @@ export default function Host() {
   const { user, loading } = useAuth();
   const [sets, setSets] = useState({});
   const [selectedKey, setSelectedKey] = useState("default");
+  const [mode, setMode] = useState("classic"); // "classic" | "fishing"
 
   useEffect(() => {
     api
@@ -25,9 +26,9 @@ export default function Host() {
   }, []);
 
   const handleHost = () => {
-    socket.emit("host:create_game", { questionSetKey: selectedKey }, (res) => {
+    socket.emit("host:create_game", { questionSetKey: selectedKey, mode }, (res) => {
       if (res.success) {
-        navigate("/host/lobby", { state: { code: res.code } });
+        navigate("/host/lobby", { state: { code: res.code, mode: res.mode } });
       }
     });
   };
@@ -61,6 +62,38 @@ export default function Host() {
     <div className="container">
       <div className="card">
         <h2>Host a Game</h2>
+
+        <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
+          Game Mode:
+        </label>
+        <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <button
+            onClick={() => setMode("classic")}
+            style={{
+              flex: 1,
+              background: mode === "classic" ? undefined : "#e5e7eb",
+              color: mode === "classic" ? undefined : "#374151"
+            }}
+          >
+            🎯 Classic Mode
+          </button>
+          <button
+            onClick={() => setMode("fishing")}
+            style={{
+              flex: 1,
+              background: mode === "fishing" ? undefined : "#e5e7eb",
+              color: mode === "fishing" ? undefined : "#374151"
+            }}
+          >
+            🎣 Fishing Mode
+          </button>
+        </div>
+        <p style={{ marginTop: -8, marginBottom: 16, fontSize: 14 }}>
+          {mode === "classic"
+            ? "Players answer questions at their own pace and earn cash directly."
+            : "Players walk around a map, answer questions for bait, fish near water, and sell their catch for cash."}
+        </p>
+
         <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
           Question Set:
         </label>

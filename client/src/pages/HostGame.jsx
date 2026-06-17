@@ -7,6 +7,7 @@ export default function HostGame() {
   const location = useLocation();
   const navigate = useNavigate();
   const code = location.state?.code;
+  const mode = location.state?.mode || "classic";
 
   const [players, setPlayers] = useState([]);
   const [ended, setEnded] = useState(false);
@@ -49,6 +50,7 @@ export default function HostGame() {
                 #{i + 1} {avatarEmoji(p.avatar)} {p.nickname}
               </span>
               <span>
+                {mode === "fishing" && <>🪱 {p.bait} | 🐟 {p.inventoryCount} | </>}
                 💰 ${p.money} | ✅ {p.correct} | ❌ {p.incorrect}
               </span>
             </li>

@@ -28,7 +28,11 @@ export default function PlayerJoin() {
       { code: code.trim().toUpperCase(), nickname: nickname.trim(), token },
       (res) => {
         if (res.success) {
-          navigate("/play", { state: { code: res.code, upgrades: res.upgrades } });
+          if (res.mode === "fishing") {
+            navigate("/play-fishing", { state: { code: res.code, upgrades: res.upgrades, initialPlayer: res.player } });
+          } else {
+            navigate("/play", { state: { code: res.code, upgrades: res.upgrades } });
+          }
         } else {
           setError(res.reason || "Could not join game.");
         }

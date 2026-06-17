@@ -24,14 +24,19 @@ export default function Home() {
                   {avatarEmoji(user.equippedAvatar)} {user.username} · ${user.balance}
                 </button>
               ) : (
-                <button className="btn-ghost" onClick={() => navigate("/login")}>
-                  Log In
-                </button>
+                <>
+                  <button className="btn-ghost" onClick={() => navigate("/login")}>
+                    Log In
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => navigate("/login", { state: { mode: "register" } })}
+                  >
+                    Sign Up
+                  </button>
+                </>
               )
             )}
-            <button className="btn-ghost" onClick={() => navigate("/question-sets")}>
-              My Question Sets
-            </button>
           </div>
         </div>
       </nav>

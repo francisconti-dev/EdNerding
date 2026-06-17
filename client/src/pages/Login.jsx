@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, register } = useAuth();
 
-  const [mode, setMode] = useState("login"); // "login" | "register"
+  const [mode, setMode] = useState(location.state?.mode === "register" ? "register" : "login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

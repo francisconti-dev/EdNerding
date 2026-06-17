@@ -113,6 +113,12 @@ export default function Account() {
         })}
       </div>
 
+      <div className="card">
+        <h3>Question Sets</h3>
+        <p>Create and manage the question sets you use when hosting games.</p>
+        <button onClick={() => navigate("/question-sets")}>My Question Sets</button>
+      </div>
+
       <button onClick={() => navigate("/")} style={{ background: "#6b7280", marginRight: 8 }}>
         Back to Home
       </button>
